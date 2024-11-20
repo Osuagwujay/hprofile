@@ -1,34 +1,41 @@
 name: Hprofile Actions
-on: workflow_dispatch
+
+on: 
+  workflow_dispatch
+
 jobs:
   Testing:
     runs-on: ubuntu-latest
+
     steps:
+      # Checkout code
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Maven test
-        run: mvn test
-
-      - name: Checkstyle
-        run: mvn checkstyle:checkstyle
-
-      # Setup java 11 to be default (sonar-scanner requirement as of 5.x)
+      # Set up Java 11
       - name: Set Java 11
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
+      # Install dependencies and run tests
+      - name: Maven test
+        run: mvn clean install
+
+      # Checkstyle
+      - name: Checkstyle
+        run: mvn checkstyle:checkstyle
+
+      # Check network connectivity (via curl instead of ping)
+      - name: Check Network Connectivity
+        run: curl -v https://sonarcloud.io/api/health
+
       # Setup sonar-scanner
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
 
-      # Check network connectivity
-      - name: Check Network Connectivity
-        run: ping -c 3 sonarcloud.io
-
-      # Run sonar-scanner
+      # Run SonarQube Scan
       - name: SonarQube Scan
         run: |
           sonar-scanner \
@@ -40,5 +47,6 @@ jobs:
           -Dsonar.junit.reportsPath=target/surefire-reports/ \
           -Dsonar.jacoco.reportsPath=target/jacoco.exec \
           -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
-          -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
+          -Dsonar.java.binaries=target/classes
+
 
