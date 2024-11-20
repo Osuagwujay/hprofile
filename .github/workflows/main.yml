@@ -17,12 +17,16 @@ jobs:
       - name: Set Java 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
+          distribution: 'temurin'
           java-version: '11'
 
       # Setup sonar-scanner
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
+
+      # Check network connectivity
+      - name: Check Network Connectivity
+        run: ping -c 3 sonarcloud.io
 
       # Run sonar-scanner
       - name: SonarQube Scan
@@ -34,6 +38,7 @@ jobs:
           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
           -Dsonar.sources=src/ \
           -Dsonar.junit.reportsPath=target/surefire-reports/ \
-          -Dsonar.jacoco.reportsPath=target/jacoco
+          -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
+          -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
 
- 
