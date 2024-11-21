@@ -1,6 +1,6 @@
 name: Hprofile Actions
 
-on: 
+on:
   workflow_dispatch
 
 jobs:
@@ -20,10 +20,10 @@ jobs:
           java-version: '11'
 
       # Install dependencies and run tests
-      - name: Maven test
+      - name: Maven install and test
         run: mvn clean install
 
-      # Checkstyle
+      # Run Checkstyle
       - name: Checkstyle
         run: mvn checkstyle:checkstyle
 
@@ -32,7 +32,7 @@ jobs:
         run: curl -v https://sonarcloud.io/api/health
 
       # Setup sonar-scanner
-      - name: Setup SonarQube
+      - name: Setup SonarQube Scanner
         uses: warchant/setup-sonar-scanner@v7
 
       # Run SonarQube Scan
@@ -49,4 +49,13 @@ jobs:
           -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
           -Dsonar.java.binaries=target/classes
 
+      # Check the Quality Gate status
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
 
+ 
